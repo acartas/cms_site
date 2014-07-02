@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Maryland Carbon Monitoring System</title>
+    
+    <link href="images/favicon.ico" rel="shortcut icon" />
+    
+	<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/nihilo/nihilo.css">
+	<link rel="stylesheet" href="./cbtree/themes/nihilo/nihilo.css">
+	<link rel="stylesheet" href="map.css">
+
+	<script type="text/javascript" src="jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="async.js"></script>
+	<script type="text/javascript">
+		var dojoConfig = {
+  		baseUrl: './',
+  		async: true,
+  		parseOnLoad: false,
+        packages: [
+          	{ name: "cbtree", location: "cbtree" },        
+          	{ name: 'esri', location: 'http://js.arcgis.com/3.9/js/esri' },
+        	{ name: 'dojo', location: 'http://js.arcgis.com/3.9/js/dojo/dojo' },
+        	{ name: 'dojox', location: 'http://js.arcgis.com/3.9/js/dojo/dojox' },
+        	{ name: 'dijit', location: 'http://js.arcgis.com/3.9/js/dojo/dijit' },
+        ]
+  	};
+	</script>
+	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
+	<script type="text/javascript" src="map.js">	</script>
+	</head>
+
+  <body class="nihilo">
+    <div id="mainWindow" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:false, liveSplitters:true">
+
+		<div id="leftDiv" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region:'left', splitter:true, gutters:false, maxSize:'290'">
+			<div id="header" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+				<h1 style="width:145px">Maryland Carbon Monitoring System</h1>			
+			</div>
+
+			<div id="leftTabs" data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'" >
+				<div id="layersTab" data-dojo-type="dijit/layout/ContentPane" title="Layers" data-dojo-props="selected:true" >
+				</div>
+
+				<div id="activeTab" data-dojo-type="dijit/layout/ContentPane" title="Active" >					
+				</div>
+								
+				<div id="toolsTab" data-dojo-type="dijit/layout/ContentPane" title="Tools" >
+					
+				</div>		
+
+				<!--div id="testTab" data-dojo-type="dijit/layout/ContentPane" title="Test" >
+					<div id="store">
+						<div class="wishlistContainer">
+							<h2>Wishlist</h2>
+							<div id="wishlistNode" class="container">
+						
+							</div>
+									<ul>
+						<li>Description of Values at Point</li>
+						<li>Calculate Biomass/Height/Canopy Cover</li>
+						<li>Get Range (makes new layer of this?)</li>
+						<li>Print View (?)</li>
+						<li>Points of Interest</li>
+						<li>Import External maps</li>
+					</ul>
+						</div>
+					</div>
+				</div-->
+	
+			</div>
+
+			<div id="footer" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+				<a href="http://geog.umd.edu">Department of Geographical Sciences</a> | <a href="http://www.umd.edu">UMD</a>
+			</div>
+		</div>			
+
+		<div id="rightDiv" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region: 'center', gutters:false">
+			<div id="topDiv" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
+					<div id="navToolbar"></div>
+			</div>
+		
+			<div id="centerDiv" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'" >
+				<div id="geocoder"></div>
+				<div id="mapDiv"></div>			
+			</div>
+		</div>
+
+    </div>
+  </body>
+</html>
+

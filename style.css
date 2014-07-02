@@ -1,0 +1,242 @@
+html, body {
+    height: 100%;
+    margin: 0px;
+    background-color: #D6CEC2;
+    font-family: serif;
+}
+
+#peopleGroup{
+	clear: both;
+}
+#peopleDesc{
+	clear: both;
+	max-width: 1000px;
+	margin-bottom: 10px;
+}
+
+#subContent{
+	max-width: 1000px;
+	padding-bottom:15px;
+}
+
+#peopleDesc img{
+	margin-top: 0px;
+}
+
+#container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#rightImg {
+	position: relative;
+	float: right;
+}
+
+#leftImg {
+	position: relative;
+	float: left;
+}
+
+header{
+	background-image:url(images/Frederick3D_flip.png);
+	background-position: 0 144px;
+	height:110px;
+	color: #FFFFFF;
+	position: relative;	
+}
+
+h1{
+	padding:0px;
+	margin:0px;
+}
+
+#content {
+    position:absolute;
+    bottom:30px;
+    top: 110px;
+    left: 0px;
+    right: 0px;
+    overflow: auto;
+    background-color: #FBFBF5;
+    border-top: 2px solid #28300B;
+    border-bottom: 2px solid #28300B;
+}
+
+
+header h1{
+	color:#B8C77B;
+	text-shadow: 2px 2px #28300B;		
+	font-family: Georgia;
+	font-style: italic;
+}
+
+#content h2{
+	margin-left:20px;
+	margin-bottom: 0px;
+	font-family: serif;
+	font-style: italic;
+	font-weight: normal;
+	
+}
+
+
+#content p{
+	margin-left:25px;
+	margin-right:20px;
+	text-align: justify;
+}
+
+#content h3{
+	margin-left:20px;
+}
+
+.source a{
+	color: black;
+	text-decoration: none;
+
+}
+
+#mapButton{
+	border: 2px outset black;
+	background: #F1F7D8;
+	padding: 5px;
+	text-decoration: none;
+	width: 200px;
+	clear: both;
+}
+
+
+#content a{
+	color: black;
+}
+#content a:hover{
+	color:#60954D;
+}
+
+.rightImg{
+	float: right;
+	margin: 20px;
+}
+.leftImg{
+	float: left;
+	margin: 20px;
+}
+
+#content img{
+	border: 1px solid black;
+}
+nav{
+	position: absolute;
+	bottom: 0px;
+}
+
+nav ul {
+	width:980px;
+		padding: 5px;	
+	margin-left: 5px;
+	margin-top:0px;
+	margin-bottom:0px;
+
+}
+
+nav ul li{
+
+}
+
+footer ul {
+	padding: 5px;	
+	margin-left: 5px;
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+nav a{
+	width: 150px;
+	height: 30px;
+	padding: 10px 5px 0;
+	border-right: 2px solid #28300B;
+	border-top: 2px solid #28300B;
+	text-align:center;
+	background: #60954D;
+	opacity:0.7;
+	filter:alpha(opacity=70); /*For IE 8 and below*/
+	float:left;
+	text-decoration: none;
+	text-transform: uppercase;
+	font-weight:bold;
+	color: black;
+}
+
+nav li:first-child a{
+	border-left: 2px solid #28300B;
+}
+
+
+nav a:hover{
+	background: #151E0D;
+	color:#DDDDDD;
+}
+
+h1{
+	padding: 5px;	
+	margin-left: 5px;
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+blockquote{
+	font-size:12pt;
+	text-align: justify;
+}
+
+blockquote:before{
+	content: "\201C";
+	font-size: 14pt;
+}
+.source{
+	display:block;
+	text-align:right;
+	font-style:italic;
+}
+.source:before{
+	content: "— ";
+}
+
+nav ul li, footer ul li{
+	display: inline;	
+}
+
+footer{
+	width: 100%;
+/*	background-color: #2A321B;*/
+	background: -webkit-linear-gradient(#425539,#1F2C1A); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(#425539,#1F2C1A); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(#425539,#1F2C1A); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(#425539,#1F2C1A); /* Standard syntax */
+    color: #FFFFFF;
+    font-size: 10pt;
+    position: absolute;
+    bottom: 0px; 
+    text-align: center;
+    height: 30px;
+}
+
+footer a:link, footer a:visited {
+    color: #FFFFFF;
+    margin: 0;
+}
+
+footer ul li:before {
+	content: " | ";
+}
+
+footer ul li:first-child:before {
+	content: none;
+}
+
+
+
+
+

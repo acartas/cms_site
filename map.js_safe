@@ -1,0 +1,811 @@
+	//Debug
+	LAYOUT_DEBUG = false; //LayoutDebug
+	//Constants
+	MD_CENTER = [-77.16, 38.48];
+	MIN_ZOOM = 8;
+	
+	//Global variables
+	var map, idParams, idContent, layerKeys30m, mouseClick, toolbar;
+	var isDrawing = false;
+	var gSimpleFillSymbol, gGraphic, gFeatureSet, gDialog, gSimpleLineSymbol, gColor, gString;
+	var curLayer;
+		
+	var layers = {
+		'pgHeight1': {
+			label: "Prince George's Canopy Height",
+			dynamic: true,
+			resolution: '1.2m',
+			url: 'http://129.2.25.192:6080/arcgis/rest/services/pg/height_1p2m/MapServer',
+			source: 'UMD',
+			description: "1.2m map of Prince George's county canopy height.",
+			units: 'Height (m)',
+			units_short: 'm',
+			opacity: 0.8,
+			idTask:null,
+			},		
+		'pgCoverBinary1': {
+			label: "Prince George's Canopy Cover",
+			dynamic: true,
+			resolution: '1.2m',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/pg/cover_binary_2m/MapServer',
+			source: 'UMD',
+			description: 'A binary map of canopy cover.',
+			units: "",
+			units_short: "",
+			legend: null,
+			opacity: 0.4,
+			idTask: null,
+		},
+		'biomass30': { 
+			label: 'Biomass', 
+			resolution: '30m', 
+			source: 'UMD',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/cms/biomass30/MapServer',
+//			url: "http://129.2.24.138:6080/arcgis/rest/services/cms/cms2_md_biomass_b/MapServer",
+			description: "Maryland aboveground biomass map [30m] generated using Random Forests regression models.",
+			units: "Biomass (Mg/ha)",
+			units_short: "Mg/ha",
+			legend: [{value: "0-25", color: "rgb(255,255,255)"},
+					{ value: "25-50", color: "rgb(208,255,115)"},
+					{ value: "50-100", color: "rgb(76,230,0)"},
+					{ value: "100-200", color: "rgb(56,168,0)"},
+					{ value: "200-300", color: "rgb(38,115,0)"},
+					{ value: "400-500", color: "rgb(15,46,0)"},
+			],
+			opacity: 1,
+			zonalStatsUrl: "http://129.2.24.138:6080/arcgis/rest/services/cms/bio_stats/GPServer/biomass_stats",
+			zonalStatsGP: null,
+			idTask: null, //added in code because i don't know about the type out here
+		},
+		'cover30': { 
+			label: 'Tree Cover', 
+			resolution: '30m', 
+			source: 'UMD',
+			url: "http://129.2.24.138:6080/arcgis/rest/services/cms/cms2_md_tree_cover/MapServer",
+			description: "High resolution tree canopy cover [1m] aggregrated to 30m pixels." ,
+			units: "Cover (percent)",
+			units_short: "%",
+			legend: [{value: "0", color: "rgb(236,252,204)"},
+					{ value: "20", color: "rgb(220,242,167)"},
+					{ value: "40", color: "rgb(205,232,130)"},
+					{ value: "60", color: "rgb(165,204,82)"},
+					{ value: "80", color: "rgb(97,158,32)"},
+					{ value: "100", color: "rgb(38,115,0)"},
+			],
+			opacity: 0.75,
+			idTask: null,
+			zonalStatsUrl: 'http://129.2.24.138:6080/arcgis/rest/services/cms/cover_stats_2/GPServer/cover_stats',
+			zonalStatsGP: null,
+		},
+		'height30': { 
+			label: 'Canopy Height', 
+			resolution: '30m', 
+			source: 'UMD',
+			url: "http://129.2.24.138:6080/arcgis/rest/services/cms/cms2_md_canopy_height/MapServer",
+			description: "100 percentile height map (P100) generated from high resolution LiDAR Canopy Height Model." ,
+			units: "Height (m)",
+			units_short: "m",
+			legend: [{value: "0", color: "rgb(168,112,0)"},
+					{ value: "10", color: "rgb(173,148,45)"},
+					{ value: "20", color: "rgb(172,184,83)"},
+					{ value: "30", color: "rgb(67,130,18)"},
+					{ value: "40", color: "rgb(44,87,10)"},
+					{ value: "50", color: "rgb(25,51,0)"},
+			],
+			opacity: 0.75,
+			zonalStatsUrl: "http://129.2.24.138:6080/arcgis/rest/services/cms/height_stats_4/GPServer/height_stats",
+			zonalStatsGP: null,
+			idTask: null,
+		},
+		'nbcdBiomass30': {
+			label: 'NBCD Biomass 2000',
+			resolution: '30m',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/nbcd/nce_biomass30m_utm18n/MapServer',
+			description: 'Year-2000 baseline estimate of basal area-weighted dry biomass produced by The Woods Hole Research Center.',
+			units: "Biomass (Mg/Ha)",
+			units_short: "Mg/Ha",
+			legend: [{value: "0-25", color: "rgb(255,255,255)"},
+					{ value: "25-50", color: "rgb(208,255,115)"},
+					{ value: "50-100", color: "rgb(76,230,0)"},
+					{ value: "100-200", color: "rgb(56,168,0)"},
+					{ value: "200-300", color: "rgb(38,115,0)"},
+					{ value: "400-500", color: "rgb(15,46,0)"},
+			],
+			opacity: 0.75,
+			idTask: null,
+		},
+		'anneArundelHowardC1': { //TODO: Move county specific info into counties array, but tricky so far with this double-array
+			label: 'Anne Arundel/Howard<br/>Forest Classification',
+			resolution: '1m',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/cms/anne_arundel_howard_forest/MapServer',
+			description: '1m map of Anne Arundel and Howard County map showing forest/non-forest classification.',
+			units: "Classification",
+			units_short: "",
+			legend: [{value: "Non-forest", color: ""},
+					{value: "Forest", color: "#00A9E6"}],
+			opacity: 0.4,
+			idTask: null,
+		},
+		'anneArundelHowardH2': {
+			label: 'Anne Arundel/Howard<br/>Canopy Height',
+			resolution: '2m',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/cms/anne_arundel_howard_canopy_height_2m/MapServer',
+			description: '2m map of Anne Arundel and Howard county canopy height.',
+			units: "Height (m)",
+			units_short: "m",
+			legend: [{value: "0", color: "rgb(168,112,0)"},
+					{ value: "10", color: "rgb(173,148,45)"},
+					{ value: "20", color: "rgb(172,184,83)"},
+					{ value: "30", color: "rgb(67,130,18)"},
+					{ value: "40", color: "rgb(44,87,10)"},
+					{ value: "50", color: "rgb(25,51,0)"},
+			],
+			opacity: 0.4,
+			idTask: null,
+		},'alleganyH1': {
+			label: 'Allegany Canopy Height',
+			resolution: '1m',
+			source: 'UMD',
+			url: 'http://129.2.24.138:6080/arcgis/rest/services/cms/md_allegany_canopy_height_1m/MapServer',
+			description: "High resolution canopy height map of Allegany County.",
+			units: "Height (m)",
+			units_short: "m",
+			legend: null,
+			idTask: null,
+			opacity: 0.4,
+		}
+	};
+		
+	var counties = {/*missing: center; */
+		'Allegany': { 
+			has_1m: true,
+			extent: {"xmin":-8805087.036280174,"ymin":4786945.333386234,"xmax":-8714356.283705791,"ymax":4830132.254367301,"spatialReference":{"wkid":102100}}
+		},
+		'Anne Arundel': { 
+			has_1m: true,
+			extent: {"xmin":-8553991.398363845,"ymin":4679857.056758904,"xmax":-8501708.471016765,"ymax":4753695.2260824125,"spatialReference":{"wkid":102100}}
+		},
+		'Baltimore City': 	{ 
+			has_1m: false,
+			extent: {"xmin":-8539774.11110263,"ymin":4749720.500611395,"xmax":-8519059.676437374,"ymax":4775326.905086894,"spatialReference":{"wkid":102100}}
+		},
+		'Baltimore': {
+			has_1m: false,
+			extent: {"xmin":-8565762.700719628,"ymin":4742688.294009118,"xmax":-8494064.768188106,"ymax":4829826.506254252,"spatialReference":{"wkid":102100}}
+		},
+		'Calvert': {
+			has_1m: false,
+			extent: {"xmin":-8540003.422187475,"ymin":4623522.9669127455,"xmax":-8501479.159931798,"ymax":4690023.181520759,"spatialReference":{"wkid":102100}}
+		},
+		'Caroline': {
+			has_1m: false,
+			extent: {"xmin":-8459591.668431574,"ymin":4669843.806053456,"xmax":-8421526.028345607,"ymax":4742994.042122271,"spatialReference":{"wkid":102100}}
+		},
+		'Carroll': {
+			has_1m: false,
+			extent: {"xmin":-8608873.184672348,"ymin":4769747.002022136,"xmax":-8545430.451195737,"ymax":4828756.387858213,"spatialReference":{"wkid":102100}}
+		},
+		'Cecil': {
+			has_1m: false,
+			extent: {"xmin":-8488331.991066774,"ymin":4774333.223719189,"xmax":-8432380.0863621,"ymax":4827762.706490455,"spatialReference":{"wkid":102100}}
+		},
+		'Charles': {
+			has_1m: false,
+			extent: {"xmin":-8603446.155664086,"ymin":4614885.582716532,"xmax":-8534729.267235804,"ymax":4674965.0869486,"spatialReference":{"wkid":102100}}
+		},
+		'Dorchester': {
+			has_1m: false,
+			extent: {"xmin":-8499033.175026653,"ymin":4615497.078942799,"xmax":-8424659.946505276,"ymax":4682150.167607383,"spatialReference":{"wkid":102100}}
+		},
+		'Frederick': {
+			has_1m: false,
+			extent: {"xmin":-8649002.624522012,"ymin":4755376.840704543,"xmax":-8579750.676895734,"ymax":4827609.832433936,"spatialReference":{"wkid":102100}}
+		},
+		'Garrett': {
+			has_1m: false,
+			extent: {"xmin":-8868224.021643858,"ymin":4748956.130328465,"xmax":-8757848.952800022,"ymax":4838081.705309015,"spatialReference":{"wkid":102100}}
+		},
+		'Harford': {
+			has_1m: false,
+			extent: {"xmin":-8527085.564407306,"ymin":4764319.973013843,"xmax":-8465477.319609538,"ymax":4828679.950829876,"spatialReference":{"wkid":102100}}
+		},
+		'Howard': {
+			has_1m: true,
+			extent: {"xmin":-8595038.082552869,"ymin":4736649.768774786,"xmax":-8536793.066999642,"ymax":4776320.586454739,"spatialReference":{"wkid":102100}}
+		},
+		'Kent': {
+			has_1m: false,
+			extent: {"xmin":-8504230.892950194,"ymin":4696596.765953163,"xmax":-8428099.612778129,"ymax":4777467.141878909,"spatialReference":{"wkid":102100}}
+		},
+		'Montgomery': {
+			has_1m: false,
+			extent: {"xmin":-8627982.441743735,"ymin":4711960.608638707,"xmax":-8557354.627608327,"ymax":4774256.786691042,"spatialReference":{"wkid":102100}}
+		},
+		"Prince George's": {
+			has_1m: true,
+			extent: {"xmin":-8576540.321707888,"ymin":4662200.103225025,"xmax":-8533276.96369846,"ymax":4737261.265001097,"spatialReference":{"wkid":102100}}
+		},
+		"Queen Anne's": {
+			has_1m: false,
+			extent: {"xmin":-8501708.471016783,"ymin":4668620.813600776,"xmax":-8426494.43518414,"ymax":4759580.877260169,"spatialReference":{"wkid":102100}}
+		}, 
+		'Sommerset': {
+			has_1m: false,
+			extent: {"xmin":-8467388.245316632,"ymin":4565965.884614071,"xmax":-8406467.933773428,"ymax":4624593.085308722,"spatialReference":{"wkid":102100}}
+		},
+		"St Mary's": {
+			has_1m: false,
+			extent: {"xmin":-8560029.923598165,"ymin":4584769.393572213,"xmax":-8492841.775735585,"ymax":4653562.719028779,"spatialReference":{"wkid":102100}}
+		},
+		'Talbot': {
+			has_1m: false,
+			extent: {"xmin":-8501020.537762085,"ymin":4660671.362659247,"xmax":-8447285.306877678,"ymax":4713642.223260803,"spatialReference":{"wkid":102100}}
+		},
+		'Washington': {
+			has_1m: false,
+			extent: {"xmin":-8727350.578514209,"ymin":4766078.024664408,"xmax":-8623472.657074794,"ymax":4829215.010027879,"spatialReference":{"wkid":102100}}
+		},
+		'Wicomico': {
+			has_1m: false,
+			extent: {"xmin":-8452712.335886149,"ymin":4608694.183425576,"xmax":-8380632.2182133235,"ymax":4660518.488602856,"spatialReference":{"wkid":102100}}
+		},
+		'Worcester': {
+			has_1m: false,
+			extent: {"xmin":-8423284.079996146,"ymin":4578654.431309393,"xmax":-8352962.013973878,"ymax":4644008.0904931305,"spatialReference":{"wkid":102100}}
+		}
+	};
+
+	var basemaps = [ {label:"Streets", bm:"streets"}, {label:"Satellite", bm:"satellite"},
+			{label:"Hybrid", bm:"hybrid"}, {label:"Topographic", bm:"topo"}, {label:"Light Gray Canvas", bm:"gray"},
+			{label:"National Geographic", bm:"national-geographic"},{label:"Open Street Map", bm:"osm"} ]; //dictionary? i guess this is fine for my purposes.
+	
+	require(["esri/arcgis/utils",
+			"esri/config",
+			"esri/map", 
+			"esri/geometry/Extent",
+			"esri/graphic",
+			"esri/dijit/Geocoder", 
+			"esri/geometry/Point",
+			"esri/layers/ArcGISDynamicMapServiceLayer",
+			"esri/layers/ArcGISTiledMapServiceLayer",
+			"esri/layers/ImageParameters",
+			"esri/request",
+			"esri/symbols/SimpleLineSymbol",
+			"esri/symbols/SimpleFillSymbol",
+			"esri/tasks/FeatureSet",
+			"esri/tasks/Geoprocessor",
+			"esri/tasks/IdentifyTask",
+			"esri/tasks/IdentifyParameters",
+			"esri/toolbars/draw",
+			"esri/toolbars/navigation",
+			"dijit/Dialog",
+			"dijit/layout/BorderContainer", 
+			"dijit/layout/ContentPane", 
+			"dijit/layout/TabContainer",
+			"dijit/form/Button",
+			"dijit/form/CheckBox",
+			"dijit/form/DropDownButton",
+			"dijit/form/ToggleButton",
+			"dijit/DropDownMenu",
+			"dijit/MenuItem",
+			"dijit/form/HorizontalSlider", 
+			"dijit/form/HorizontalRuleLabels", 
+			"dijit/form/HorizontalRule",
+			"dijit/TitlePane",
+			"dijit/Toolbar",
+			"dijit/Tooltip",
+			"dijit/TooltipDialog",
+			"dojo/_base/Color",
+			"dojo/string",
+			"dojo/parser",
+			"dojox/layout/FloatingPane",
+			"dojo/domReady!"
+			], 
+	function InitializeLayout(arcgisUtils, esriConfig, Map, Extent, Graphic, Geocoder, Point, ArcGISDynamicMapServiceLayer, ArcGISTiledMapServiceLayer,
+			ImageParameters, esriRequest, SimpleLineSymbol, SimpleFillSymbol, FeatureSet, Geoprocessor, IdentifyTask, IdentifyParameters, Draw, Navigation,
+			Dialog,	BorderContainer, ContentPane, TabContainer, Button, CheckBox, DropDownButton, ToggleButton, DropDownMenu, MenuItem, HorizontalSlider, 
+			HorizontalRuleLabels, HorizontalRule,TitlePane, Toolbar, Tooltip, TooltipDialog, Color, dojoString, parser, FloatingPane) {
+	
+	parser.parse(); //Parses out Dojo elements from the DOM.
+	gSimpleFillSymbol = SimpleFillSymbol;
+	gGraphic = Graphic;
+	gFeatureSet = FeatureSet;
+	gDialog = Dialog;
+	gSimpleLineSymbol = SimpleLineSymbol;
+	gColor = Color;
+	gString = dojoString;
+
+	//---testing stuff---
+	//---end testing ----
+	//1. Map
+	map = new Map("mapDiv",{
+	  	basemap: "topo",
+	  	center: MD_CENTER,
+ 		logo: false,
+	  	zoom: MIN_ZOOM,
+	  	sliderStyle: "small"
+	});
+	
+	map.on("load", function(evtObj){
+			map.infoWindow.resize(250,100);
+			initTools(evtObj);
+	});
+	
+	function initTools(evtObj) {
+		toolbar = new Draw(evtObj.map, { showTooltips: true });
+		toolbar.setFillSymbol(new SimpleFillSymbol("solid", new SimpleLineSymbol("dash", new Color("#444444"), 2), new Color([ 255, 226, 124,0.5])));
+		toolbar.on("draw-end", computeZonalStats); //have to switch this within each button.
+
+	}
+	
+	//---testing stuff---
+	//---end testing ----
+
+	//2. Layers: Maps, Visibility, Opacity, Description, Legend. One pane each for Biomass (30m), Canopy Height (30m), Tree Cover (30m)
+	for (var cur in layers){	
+		curLayer = cur;
+		//0. Finish initializing the layers array
+		layers[cur].idTask = new IdentifyTask(layers[cur].url); //set IdentifyPoint
+		if (layers[cur].zonalStatsUrl != null){ //set ZonalStatsGP
+			layers[cur].zonalStatsGP = new Geoprocessor(layers[cur].zonalStatsUrl);
+			layers[cur].zonalStatsGP.setOutSpatialReference({wkid:102100}); //Needed for error-checking if user selects outside of MD.
+		}
+			
+		//TODO: Use dojo/dnd (?) To allow redordering of layers in toolbar.
+		//TODO: Decide whether to use dynamic or tiled. Probably tiled (with created cache).
+		//A. Dynamic Map Service 
+		if (!LAYOUT_DEBUG){
+			if (layers[cur].resolution == '30m' || layers[cur].dynamic == true){
+				map.addLayer(new ArcGISDynamicMapServiceLayer(layers[cur].url,{
+					opacity: layers[cur].opacity,
+					id: cur,
+					visible: false,
+					showAttribution: false	
+				}));
+			} else {
+				map.addLayer(new ArcGISTiledMapServiceLayer(layers[cur].url,{
+					opacity: layers[cur].opacity,
+					id: cur,
+					visible: false,
+					showAttribution: false	
+				}));
+			}
+		}
+		//B.TitlePane (container)
+		var curMenu = new TitlePane({
+			layer: cur,
+			title: layers[cur].label + " ("+layers[cur].resolution+")",
+			id: cur+"Menu",
+			open: false,
+		}).placeAt(dojo.byId("layersTab"));
+
+		//C. Checkbox (in title-area)
+		var cb = new CheckBox({
+			layer: cur,
+			id:cur+"Checkbox", 
+			'class': 'layerCheckbox',
+			onClick: function(e){ e.stopPropagation(); },
+			onChange: function(isChecked){
+				map.getLayer(this.layer).setVisibility(isChecked);
+			}
+		}).placeAt(curMenu.focusNode);
+
+		//D. Calculate Statistic
+		//TODO: Add dialog for all stats types! ASAP>>>>>>>>
+		if (layers[cur].resolution == '30m' && layers[cur].source == 'UMD'){
+			curMenu.focusNode.appendChild(dojo.create("div", {
+				'type' : 'button',
+				'class': 'statsButtonInactive',
+				'id' : cur+"StatsButton",
+				'onclick': 'calculateStats(event, "'+cur+'")',
+				'onmouseover': "this.classList.add('statsButtonHover')",
+				'onmouseout': "this.classList.remove('statsButtonHover')"
+			}));
+
+			var statsTooltip = new Tooltip({
+				id: cur+"StatsTooltip",
+				connectId: [cur+"StatsButton"],
+				label: "Click to calculate " + layers[cur].label.toLowerCase() + " over an area.",
+			});
+
+/*			var calcStatsPane = new FloatingPane({
+				title: "Calculate " + layers[cur].label + " Statistics",
+				id: cur+"calcStatsPane",
+				'class': "calcStatsPane",
+				closable: false,
+				content: "Click and drag to draw a polygon. Please be patient while your results are processed.",
+			}).placeAt(dojo.byId("mapDiv"));			
+		*/}
+	
+		//E. Opacity Slider
+		curMenu.containerNode.appendChild(dojo.create("label", {'for': cur+"OpacitySlider", innerHTML: "Layer Opacity"}));
+		
+		var slider = new HorizontalSlider({
+			id:cur+"OpacitySlider",
+			layer: cur,
+			value: layers[cur].opacity,
+			minimum: 0,
+			maximum: 1,
+			intermediateChanges: true,
+			showButtons:false, 
+			onChange: function(value){ 
+				map.getLayer(this.layer).setOpacity(value);
+			},
+		}).placeAt(curMenu.containerNode);
+		
+		var ruler = new HorizontalRule({
+			container: "bottomDecoration",
+			count: 11,
+			style: "height:5px;"
+		}).placeAt(slider);
+		
+		var rulerLabel = new HorizontalRuleLabels({
+			container: "bottomDecoration",
+			style: "height:1em; font-size:75%; color:gray",
+		}).placeAt(slider);
+
+		//F. Description
+		curMenu.containerNode.appendChild(dojo.create("p", {innerHTML: layers[cur].description}));
+		
+		//F. Legend
+		if (layers[cur].legend != null){ //hand-made legend
+			var legendContent = '<tr><th colspan="2">'+layers[cur].units+'</th></tr>';
+			for (i = layers[cur].legend.length-1 ; i>= 0; i--){
+				legendContent += '<tr><td class="colorCell" style="background-color:'+layers[cur].legend[i].color+'"></td><td>'+layers[cur].legend[i].value+'</td></tr>';
+			}
+			curMenu.containerNode.appendChild(dojo.create("table", {'class': "mapLegend", innerHTML: legendContent}));
+		} else { //TODO: automatic legend. switch all to this format.
+			response = $.parseJSON(getLegend(layers[cur].url));
+			legend = response["layers"][0]["legend"]; //This is only for layer 0, since all my maps atm have just one.
+			var legendContent = '<tr><th colspan="2">'+layers[curLayer].units+'</th></tr>';
+			for (i = 0 ; i< legend.length; i++){
+				legendContent += '<tr><td><img src="'+layers[curLayer].url+'/0/images/'+legend[i]["url"]+'"></td><td>'+legend[i]["label"]+'</td></tr>';
+			}
+			dijit.byId(curLayer+"Menu").containerNode.appendChild(dojo.create("table", {'class': "mapLegend", innerHTML: legendContent}));
+		}	
+	}		
+	
+	//Set our first map to open at start-up.
+	var firstLayer = dijit.byId('layersTab').getChildren()[0];
+	firstLayer.set("open",true);
+	if (!LAYOUT_DEBUG) dijit.byId(firstLayer.layer+"Checkbox").set("checked",true);
+		
+	layerKeys30m = [];
+	for (var key in layers) {
+    	if (layers.hasOwnProperty(key) && layers[key].resolution == '30m') {
+    	    layerKeys30m.push(key);
+    	}
+	}
+	
+	//3. Navigation Toolbar
+	var navToolbar = new Toolbar({}, "navToolbar");
+	var navTools = new Navigation(map);
+	//3A. Simple buttons
+	PopulateToolbar: {
+		var zoomInButton = new Button({	
+			id: "zoomInButton",
+			iconClass: "zoomInIcon",
+			onClick: function(){ navTools.activate(Navigation.ZOOM_IN); },
+			label: "Zoom In"
+		}).placeAt(navToolbar);
+		
+		var zoomOutButton = new Button({
+			id: "zoomOutButton",
+			iconClass: "zoomOutIcon",
+			onClick: function() {navTools.activate(Navigation.ZOOM_OUT); },
+			label: "Zoom Out"
+		}).placeAt(navToolbar);
+			
+		var zoomFullExtButton = new Button({
+			id: "zoomFullExtButton",
+			iconClass: "zoomFullExtIcon",
+			onClick: function(){ map.centerAndZoom(MD_CENTER, MIN_ZOOM); },
+			label: "Full Extent"
+		}).placeAt(navToolbar);
+		
+		var zoomPrevButton = new Button({
+			id: "zoomPrevButton",
+			iconClass: "zoomPrevIcon",
+			onClick: function() {navTools.zoomToPrevExtent(); },
+			label: "Previous Extent"
+		}).placeAt(navToolbar);
+	
+		var zoomNextButton = new Button({
+			id: "zoomNextButton",
+			iconClass: "zoomNextIcon",
+			onClick: function() {navTools.zoomToNextExtent(); },
+			label: "Next Extent"
+		}).placeAt(navToolbar);
+			
+		var panButton = new Button({ 
+			id: "panButton",
+			iconClass: "panIcon",
+			onClick: function(){ navTools.activate(Navigation.PAN);},
+			label: "Pan"
+		}).placeAt(navToolbar);
+		
+		var deactivateIcon = new Button({
+			id: "deactivateButton",
+			iconClass: "deactivateIcon",
+			onClick: function(){ navTools.deactivate();},
+			label: "Deactivate"
+		}).placeAt(navToolbar);
+		
+		dojo.connect(navTools, "onExtentHistoryChange", function(){	
+			zoomPrevButton.disabled = navTools.isFirstExtent();
+			dijit.byId("zoomNextButton").disabled = navTools.isLastExtent(); //TODO: Fix issue on first/last extent, have to click twice for change to happen
+		});	//on(navTools, "onExtentHistoryChange", extentHistoryChangeHandler); //dojo API recommends this method, but I can't get it to work.
+	}
+	
+	//3B. Zoom to County
+	ZoomToCounty: {
+		var selectCountyMenu = new DropDownMenu({ 
+				style: "display: none;",
+				id: 'selectCountyMenu'
+				});
+			
+		for (var cur in counties){
+			var ic = (counties[cur].has_1m ? "oneMeterIcon" : "");
+			selectCountyMenu.addChild(new MenuItem({
+				label: cur,
+				iconClass: ic,
+				onClick: function(){ map.setExtent(new Extent(counties[this.label].extent)); } //TODO: switch to center-and-zoom
+			}));
+			
+		}
+		
+		var countyButton = new DropDownButton({
+			iconClass: 'countyIcon',
+			label: "Zoom to County",
+			dropDown: selectCountyMenu
+		}).placeAt(navToolbar);	
+	}
+	
+	//3C. Switch Basemaps
+	SwitchBasemaps: {
+		var basemapMenu = new DropDownMenu({
+				style: "display: none;",
+				id: 'selectBasemapMenu'
+		});
+		
+		for (i = 0; i< basemaps.length; i++){ 
+			basemapMenu.addChild(new MenuItem({
+				label: basemaps[i].label,
+				basemap: basemaps[i].bm, 
+				onClick: function(){ map.setBasemap(this.basemap);	} 
+			}));
+		}	
+			
+		var basemapButton = new DropDownButton({
+			iconClass: 'basemapIcon',
+			label: "Switch Basemap",
+			dropDown: basemapMenu
+		}).placeAt(navToolbar);
+	}
+		
+	//3D. Calculate Biomass
+	CalculateBiomass: {
+
+		var biomassDialog = new TooltipDialog({
+			content: '<div id="biomassDialog"><p style="text-align:justify;">Click and drag to draw a polygon and calculate biomass. Please be patient while your results are processed.</p></div>'
+		});
+		
+	var calcBiomassMenu = new DropDownButton({
+			iconClass: 'calcBiomassIcon',
+			label: "Calculate Biomass",
+			dropDown: biomassDialog
+		}).placeAt(navToolbar);
+		
+		//don't know what this means, from the tutorial!
+		esriConfig.defaults.io.proxyUrl = "/proxy"; //identify proxy page to use if the toJson payload to the geoprocessing service is greater than 2000 characters.
+		esriConfig.defaults.io.alwaysUseProxy = false; //If this null or not available the gp.execute operation will not work.  Otherwise it will do a http post to the proxy.
+
+		var calcBioBtn = new Button({
+			label: "Calculate Biomass",
+			onClick: function(){
+				isDrawing = true;
+				toolbar.on("draw-end", computeZonalStats); //have to switch this within each button.
+				this.set('label',"Selection in Progress...");
+				this.set('disabled',true);
+				map.graphics.clear(); 
+				map.infoWindow.hide();
+				toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);
+				map.hideZoomSlider();
+				cancelButton.set('disabled',false);
+				},
+			}).placeAt(biomassDialog);
+		
+		var cancelButton = new Button({
+			label: "Cancel Drawing",
+			onClick: function(){
+				toolbar.deactivate();
+				calcBioBtn.set('label',"Calculate Biomass");
+				calcBioBtn.set('disabled',false);
+				map.graphics.clear();
+				map.infoWindow.hide();
+				toolbar.deactivate(esri.toolbars.Draw.FREEHAND_POLYGON);
+				map.showZoomSlider();
+			disabled: true;
+			},
+		}).placeAt(biomassDialog);
+		
+		gp = layers['biomass30'].zonalStatsGP;
+		
+			}
+		
+	//4. Geocoder
+	var geocoder = new Geocoder({ 
+		map: map ,
+		arcgisGeocoder: {
+			url: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+			placeholder: "Find a location"
+		}}, "geocoder");			
+	geocoder.startup();
+
+	//5. Point values on click
+    idParams = new IdentifyParameters();
+	idParams.tolerance = 3;
+	idParams.returnGeometry = true;	
+	
+	map.on("click", identifyPoint);
+	
+	//5. Dialogs
+	statsResultsDialog = new Dialog({
+		id: 'statsResultsDialog',
+		title: "Calculate Results",
+		content: "Processing...",
+		style: "width: 270px; height:109px; background-color: white; background: #fff",
+		closable: true,
+		onHide: function(){
+//			map.graphics.clear();
+			isDrawing=false;
+			dojo.byId(curLayer+"StatsButton").classList.remove("statsButtonActive");
+		}
+	});
+});
+
+
+function identifyPoint(evt){
+	if (isDrawing) return; //reactivate this once I add biomass calculation again.
+	map.graphics.clear();
+
+	mouseClick = evt.screenPoint;
+	
+	idParams.geometry = evt.mapPoint;
+	idParams.mapExtent = map.extent;		
+	idParams.width = map.width;
+	idParams.height = map.height;	
+	
+	idContent = "<table border=0>";
+	executeIdTasksRecursively(0);
+
+}
+
+//TODO: Learn how to use dojo.deferred instead of recursive thing!
+function executeIdTasksRecursively(index){
+	layers[layerKeys30m[index]].idTask.execute(idParams, function(idResults){
+
+		val = parseFloat(idResults[0].feature.attributes["Pixel Value"]).toFixed(2);
+		
+
+		if (val >= 0){
+			if (layers[layerKeys30m[index]].label == "Tree Cover"){
+				val = parseFloat(val* 100).toFixed(2);
+			}			
+			idContent+= "<tr><td>"+ layers[layerKeys30m[index]].label + ": </td><td>" + val + " "+ layers[layerKeys30m[index]].units_short + "</td></tr>";
+		}
+		else 
+		{ 
+			idContent+= "<tr><td>" + layers[layerKeys30m[index]].label + ": </td><td>n/a</td></tr>";
+		}
+
+		//Continue to next task (I don't get how dojo.deferred works, this is my solution after 8hrs of nothing working)
+		if (index < layerKeys30m.length-1){
+			executeIdTasksRecursively(index+1);
+		} else {
+			//stopping condition
+			map.infoWindow.setTitle("Values at Point");
+			map.infoWindow.setContent(idContent+"</table>");		
+			map.infoWindow.show(mouseClick, map.getInfoWindowAnchor(mouseClick));
+		}
+	}, function(err){console.log(err);});
+
+}
+
+//TODO: Handle internet explorer
+function calculateStats(e,layer){
+	
+	e.stopPropagation();
+
+	if (isDrawing){
+		dojo.byId(curLayer+"StatsButton").classList.remove("statsButtonActive"); //deactivate any last ones
+		if (curLayer==layer){
+			isDrawing = false;
+			toolbar.deactivate();
+			map.showZoomSlider();
+			return; //We clicked a second time, cancel the drawing.
+		}
+	}
+
+	dojo.byId(layer+"StatsButton").classList.add("statsButtonActive");
+	
+	isDrawing = true;
+	curLayer = layer;
+	map.graphics.clear(); 
+	map.infoWindow.hide();
+	toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);
+	map.hideZoomSlider();
+}
+
+function computeZonalStats(evtObj) {
+	var geometry = evtObj.geometry;
+	map.showZoomSlider();
+	
+	var symbol = new gSimpleFillSymbol("solid", new gSimpleLineSymbol("solid", new gColor("#444444"), 2), new gColor([ 255, 226, 124,0.75]));
+	var graphic = new gGraphic(geometry,symbol);
+
+	map.graphics.add(graphic);
+	toolbar.deactivate();
+
+	var features= [];
+	features.push(graphic);
+
+	var featureSet = new gFeatureSet();
+	featureSet.features = features;
+	
+	var params = { "inputPoly":featureSet};
+
+	statsResultsDialog.set('title', "Calculate " + layers[curLayer].label+ " Results");
+	statsResultsDialog.set('content', "Processing...");
+	statsResultsDialog.show();
+		
+	if (layers[curLayer].zonalStatsGP == null)
+		displayError("No geoprocessor available.");
+	else		
+		layers[curLayer].zonalStatsGP.execute(params, displayResults, displayError);
+}
+	
+function displayResults(results) {
+	
+	var content="Administrator forgot to interpret results!";
+
+	if (results[0].value.features.length == 0){
+		content="No calculations available outside of Maryland.";
+	} 
+	else if (curLayer=='cover30'){
+		content = gString.substitute(
+		"The mean canopy cover in the selection is ${mean:dojo.number.format}%. ", {mean: parseFloat(results[0].value.features[0].attributes.MEAN).toFixed(2)});
+	}
+	else if (curLayer=='height30'){
+		content = gString.substitute(
+		"The mean canopy cover in the selection is ${mean:dojo.number.format}m.<br/>The max tree height is ${max:dojo.number.format}m. ", {max: parseFloat(results[0].value.features[0].attributes.MAX).toFixed(2), mean: parseFloat(results[0].value.features[0].attributes.MEAN).toFixed(2)});
+	}
+	else if (curLayer=='biomass30'){
+		content = gString.substitute(
+			"The total " + layers[curLayer].label.toLowerCase() + "  in the selection is ${sum:dojo.number.format} Mg.<br/>The mean value is ${mean:dojo.number.format} Mg/ha. ",
+			{sum: (results[0].value.features[0].attributes.SUM), mean: (results[0].value.features[0].attributes.MEAN)});
+	}
+	
+	statsResultsDialog.set("content", content);
+	
+	isDrawing = false;
+}
+
+function displayError(err){
+	var content = err + "<br/> Please contact site administrator.";
+	
+	statsResultsDialog.set("content", content);
+
+	isDrawing = false;
+}
+
+function getLegend(url){
+	return $.ajax({
+		type: "GET",
+		url: url+"/legend?f=json",
+		async: false,
+		dataType: "json"
+	}).responseText;
+}
+
+

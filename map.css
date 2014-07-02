@@ -1,0 +1,203 @@
+/*General*/
+html, body, #mainWindow, #rightDiv, #mapDiv {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+s {
+	display: none;
+}
+
+#mapDiv{
+	position: relative;
+}
+
+#topDiv{
+	margin: 0;
+	padding: 0;
+	min-height: 23px;
+}
+
+#centerDiv{
+	margin: 0;
+	padding: 0;
+	height: auto;
+}
+body {
+    background-color: #D6CEC2;
+    font-family: arial,helvetica,clean,sans-serif;
+}
+
+#leftTabs {
+	height: 100%;
+}
+
+#leftDiv {
+	width: 300px;
+}
+
+/*Layers Tab*/
+.nihilo .dijitTooltip {
+	max-width: 150px;
+}
+
+
+.statsButtonTooltip{
+	text-align: justify;
+}
+
+.statsButtonInactive{
+	float: right;
+	margin-right: 5px;
+	background-image:url(images/nav_stats.png); 
+	width:16px; 
+	height:16px;
+	border:1px dashed #E0EDB4;
+}
+
+.statsButtonHover{
+	border: 1px dashed red;
+}
+
+.statsButtonActive{
+	float: right;
+	margin-right: 5px;
+	background-image:url(images/nav_stats.png);
+	width:16px;
+	height:16px;
+	border: 1px solid red;
+}
+
+
+
+
+
+
+.statsIcon{ 
+	background-image:url(images/nav_stats.png); 
+	width:16px; 
+	height:16px;
+}
+
+.dijitTitlePane {
+	padding-bottom: 5px;
+	font-size: 80%;
+	text-align: justify;
+}
+
+#treeInstructions, #activeInstructions{
+	font-size: 90%;
+}
+
+.dijitTitlePaneContentInner{
+	font-size: 85%;	
+}
+.layerCheckbox{
+	float: right;
+}
+
+.mapLegend{
+	margin-top: 10px;
+	font-size: 100%;
+	border-collapse: separte;
+	border-spacing: 5px 0px;
+}
+
+/*Legend*/
+.mapLegend .colorCell{
+	width:30px; 
+}
+
+/*Header*/
+h1 {
+    float: left;
+    margin: 5px;
+    padding: 0px;
+    position: absolute;
+	font-family: Georgia;
+	font-size: 17px;
+	font-weight: normal;
+}
+
+#header {
+    background-color: #193300;
+    color: #FFFFFF;
+    height: 50px;
+    padding: 0px;
+}
+
+/*Footer*/
+#footer {
+    background-color: #193300;
+    color: #FFFFFF;
+    font-size: 10pt;
+    padding: 5px;
+    text-align: center;
+}
+
+#footer a:link, #footer a:visited {
+    color: #FFFFFF;
+    margin: 0;
+    padding: 20px 0 0;
+}
+
+
+/*Tools that overlay the map*/
+.esriLargeSliderTL{}
+
+#geocoder {
+	display: block;
+	position: absolute;
+	z-index: 2;
+	top: 20px;
+	right: 20px;
+}
+
+#basemapToggle {
+    position: absolute;
+    top: 78px;
+    right: 17px;
+    z-index: 50;
+   }
+
+#biomassDialog {
+	width: 300px;
+}
+
+.calcStatsDialog{
+	text-align: justify;
+	width: 310px;	
+}
+
+/*Calculate Statistics Tool*/
+.calcStatsPane{
+	position: absolute;
+	top:20px;
+	width: 300px;
+	font-size: 95%;
+	text-align: center;
+}
+
+.dojoxFloatingPaneCanvas {
+	padding: 5px;
+}
+
+/*Layers Tree*/
+#cbTree {
+	font-size: 90%;
+	padding-bottom: 5px;
+}
+
+/*Toolbar icons*/
+.oneMeterIcon{ background-image:url(images/oneMeterIcon.png); width:18px; height:18px; }
+.basemapIcon{ background-image:url(images/nav_basemap.png); width:16px; height:16px; }
+.calcBiomassIcon{ background-image:url(images/nav_calcbiomass.png); width:16px; height:16px; }
+.countyIcon{ background-image:url(images/nav_county.png); width:16px; height:16px; }
+.zoomInIcon { background-image:url(images/nav_zoomin.png); width:16px; height:16px; }
+.zoomOutIcon { background-image:url(images/nav_zoomout.png); width:16px; height:16px; }
+.zoomFullExtIcon { background-image:url(images/nav_fullextent.png); width:16px; height:16px; }
+.zoomPrevIcon { background-image:url(images/nav_previous.png); width:16px; height:16px; }
+.zoomNextIcon { background-image:url(images/nav_next.png); width:16px; height:16px; }
+.panIcon { background-image:url(images/nav_pan.png); width:16px; height:16px; }
+.deactivateIcon { background-image:url(images/nav_decline.png); width:16px; height:16px; }
