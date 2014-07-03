@@ -1,5 +1,6 @@
 //Debug
 LAYOUT_DEBUG = false;
+LOAD_STORE = true;
 
 //*********************//
 //***Utility methods***//
@@ -116,6 +117,7 @@ require(["cbtree/Tree",
 		"esri/dijit/Geocoder", 
 		"esri/geometry/Point",
 		"esri/layers/ArcGISDynamicMapServiceLayer",
+		"esri/layers/ArcGISImageServiceLayer",
 		"esri/layers/ArcGISTiledMapServiceLayer",
 		"esri/layers/ImageParameters",
 		"esri/request",
@@ -155,7 +157,7 @@ require(["cbtree/Tree",
 		"dojo/domReady!"
 		], 
 	function InitializeLayout(Tree, ObjectStore, StoreModel, QueryEngine,
-			arcgisUtils, esriConfig, Map, Extent, Graphic, Geocoder, Point, ArcGISDynamicMapServiceLayer, ArcGISTiledMapServiceLayer,
+			arcgisUtils, esriConfig, Map, Extent, Graphic, Geocoder, Point, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer,
 			ImageParameters, esriRequest, SimpleLineSymbol, SimpleFillSymbol, FeatureSet, Geoprocessor, IdentifyTask, IdentifyParameters, 
 			PrintParameters, PrintTask, PrintTemplate, Draw, Navigation,
 			Dialog,	BorderContainer, ContentPane, TabContainer, Button, CheckBox, DropDownButton, ToggleButton, DropDownMenu, MenuItem, HorizontalSlider, 
@@ -183,6 +185,7 @@ require(["cbtree/Tree",
 	gDojo.Geoprocessor = Geoprocessor;
 	gDojo.Button = Button;
 	gDojo.ArcGISTiledMapServiceLayer = ArcGISTiledMapServiceLayer;
+	gDojo.ArcGISImageServiceLayer = ArcGISImageServiceLayer;
 	gDojo.ArcGISDynamicMapServiceLayer = ArcGISDynamicMapServiceLayer;
 
 	//Testing drag and drop
@@ -225,46 +228,55 @@ require(["cbtree/Tree",
 	//2a. Biomass/Height/Canopy maps
 	var serviceFolders = [{id: 'biomass', label: 'Biomass'}, {id: 'height', label: 'Canopy Height'},  {id: 'cover', label: 'Canopy Cover'}, {id: 'ed', label: 'ED Model Beta Estimates'}];
 
-	async.each(serviceFolders, 
-		function(ser, callback){		
-			store.add({id: ser.id, name: ser.label, type: "parent"});
-			var curMaps = getJSONSync(servicesUrl + ser.id).services;
-			addMapsToFolder(curMaps, ser.id, callback);
-		},
-		function(err){
-			if (err)
-				console.log("Could not locate all serviceFolders.");
-			else{
-				model  = new StoreModel({ 
-					store:store, 
-					query:{type:"parent"} 
-					});
-		
-				tree = new Tree( {
-					id: "cbTree",
-					model:model, 
-					showRoot:false, 
-					branchIcons: false,
-					branchCheckBox: false,
-					leafIcons: false,
-					openOnClick: true,
-					autoExpand: false,
-					}).placeAt(dojo.byId("layersTab"));
-				
-				tree.startup();
-				tree.on("checkBoxClick", function(item){
-					toggleActiveLayer(item);
-				});	
-				
-				
-				toggleActiveLayer(store.get('biomass/fullState')); //Setup: Make this one open on startup
-				tree.expandChecked();
-			}
-		}
-	);
-	
-	buildZonalStatsTool(); //Temporary version until the all-layers version is available.
+	if (LOAD_STORE){
+		async.each(serviceFolders, 
+			function(ser, callback){		
+				store.add({id: ser.id, name: ser.label, type: "parent"});
+				var curMaps = getJSONSync(servicesUrl + ser.id).services;
+				addMapsToFolder(curMaps, ser.id, callback);
+			},
+			function(err){
+				if (err)
+					console.log("Could not locate all serviceFolders.");
+				else{
 
+					model  = new StoreModel({ 
+						store:store, 
+						query:{type:"parent"},
+						onNewItem: function(item, parentInfo){
+							if (this.store.getValue(item, 'type') == 'parent'){
+								this._requeryTop();
+							}
+							this.inherited(arguments);
+						}
+						});
+			
+					tree = new Tree( {
+						id: "cbTree",
+						model:model, 
+						showRoot:false, 
+						branchIcons: false,
+						branchCheckBox: false,
+						leafIcons: false,
+						openOnClick: true,
+						autoExpand: false,
+						}).placeAt(dojo.byId("layersTab"));
+					
+					tree.startup();
+					tree.on("checkBoxClick", function(item){
+						toggleActiveLayer(item);
+					});	
+					
+					
+					toggleActiveLayer(store.get('biomass/fullState')); //Setup: Make this one open on startup
+					tree.expandChecked();
+				}
+			}
+		);
+	}
+		
+	buildZonalStatsTool(); //Temporary version until the all-layers version is available.
+	buildAddMapTool();
 	buildPrintTool();
 	
 	//3. Navigation Toolbar
@@ -604,6 +616,82 @@ function buildZonalStatsTool(){
 	
 }
 
+function buildAddMapTool(){
+	
+	var content= "Enter the URL of an ArcGIS On-line map service to add it to this map. It will be added to a 'custom' folder in the Layers tab. Some tools on this page may not apply for custom layers.<br><br>"+
+	"URL:<br><input style='width:250px' type='text' id='addMapUrl' name='addMapUrl' value='http://geodata.md.gov/imap/rest/services/Boundaries/MD_PhysicalBoundaries/MapServer'><br>"+
+	"Map Title:<br><input style='width:250px' type='text' id='addMapTitle' name='addMapTitle' value='County Boundaries'>"+
+	"<span id='addMapResults'></span><br><br>";
+	
+	var addMapMenu = new gDojo.TitlePane({
+		title: "Add Custom Layer",
+		id: addMapMenu,
+		content: content,
+		open: true
+	}).placeAt(dojo.byId("toolsTab"));
+	
+	var addMapUrl = dojo.byId('addMapUrl');
+	var addMapTitle = dojo.byId('addMapTitle');
+	var addMapResults = dojo.byId('addMapResults');
+	
+	var addMapButton = new gDojo.Button({
+		label: "Add to Map",
+		onClick: function(){
+			
+			addMapResults.innerHTML = 'Processing...';
+			addMapButton.set('disabled',true);
+			
+			//Error-checking
+			if (store.get(addMapTitle.value)){
+				addMapResults.innerHTML = 'Layer with this title already exists.';	//Error: Duplicate title
+			} 
+			else {
+				try{var mapInfo = getJSONSync(addMapUrl.value);}
+				catch (err){
+					addMapResults.innerHTML = 'Invalid URL';						//Error: Not an ESRI URL
+				}				
+				if (mapInfo.error){
+						addMapResults.innerHTML = 'Invalid URL';			//Error: Not a valid map service
+				}	
+				else {	
+					try{
+						//No error: Process!
+						var newLayer = [];
+						newLayer.url = addMapUrl.value;						
+						newLayer.id = addMapTitle.value;
+						newLayer.name = addMapTitle.value;
+						newLayer.fullName= addMapTitle.value;
+						newLayer.opacity = 0.8;
+						newLayer.type = "child";
+						newLayer.tiled = (mapInfo.lods != null);
+						newLayer.parent = 'custom';
+						newLayer.idTask = new gDojo.IdentifyTask(newLayer.url);
+						newLayer.mapInfo = mapInfo;
+						newLayer.checked = true;
+	
+						if (newLayer.url.endsWith('ImageServer') || newLayer.url.endsWith('ImageServer/')){
+							newLayer.isImageService = true;
+						}
+						
+						store.add(newLayer);
+						toggleActiveLayer(newLayer);
+		
+						addMapResults.innerHTML = 'Successfully added.';
+						
+						//add 'custom' folder if it doesn't exist yet
+						if (store.get('custom') == null)
+							store.add({id: 'custom', name: "Custom Layers", type: "parent"});				
+					}
+					catch(err){
+						addMapResults.innerHTML= err;
+					}
+				}
+		}
+		addMapButton.set('disabled',false);
+	}	
+	}).placeAt(addMapMenu);
+}
+
 function buildPrintTool(){
 	var url = servicesUrl + 'Utilities/PrintingTools/GPServer/Export Web Map Task';
 	var printTask = new gDojo.PrintTask(url);
@@ -761,7 +849,7 @@ function getJSONSync(url){
 
 function toggleActiveLayer(item){
 	if (item.checked && !map.getLayer(item.id)){
-		buildLayerMenu(item)
+		buildLayerMenu(item);
 		if (!LAYOUT_DEBUG){
 			var layerParams = {
 				opacity: item.opacity,
@@ -771,6 +859,8 @@ function toggleActiveLayer(item){
 			};
 			if (item.tiled)
 				map.addLayer(new gDojo.ArcGISTiledMapServiceLayer(item.url, layerParams));
+			else if (item.isImageService)
+				map.addLayer(new gDojo.ArcGISImageServiceLayer(item.url, layerParams));
 			else
 				map.addLayer(new gDojo.ArcGISDynamicMapServiceLayer(item.url, layerParams));
 		}
