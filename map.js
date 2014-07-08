@@ -303,7 +303,7 @@ require(["cbtree/Tree",
 		branchCheckBox: false,
 		leafIcons: false,
 		openOnClick: true,
-		autoExpand: false,
+		autoExpand: false
 		}).placeAt(dojo.byId("layersTab"));
 	
 	tree.startup();
@@ -568,7 +568,7 @@ function buildZonalStatsTool(){
 			toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);
 			map.hideZoomSlider();
 			cancelStatsButton.set('disabled',false);
-			},
+			}
 		}).placeAt(zonalStatsMenu);
 	
 	cancelStatsButton = new gDojo.Button({
@@ -582,7 +582,7 @@ function buildZonalStatsTool(){
 			map.infoWindow.hide();
 			toolbar.deactivate(esri.toolbars.Draw.FREEHAND_POLYGON);
 			map.showZoomSlider();
-		},
+		}
 	}).placeAt(zonalStatsMenu);
 	
 }
@@ -886,7 +886,7 @@ function buildLayerMenu(curMap){
 			showButtons:false, 
 			onChange: function(value){ 
 				map.getLayer(this.layer).setOpacity(value);
-			},
+			}
 		}).placeAt(curMenu.containerNode);
 		
 		var ruler = new gDojo.HorizontalRule({
@@ -897,7 +897,7 @@ function buildLayerMenu(curMap){
 		
 		var rulerLabel = new gDojo.HorizontalRuleLabels({
 			container: "bottomDecoration",
-			style: "height:1em; font-size:75%; color:gray",
+			style: "height:1em; font-size:75%; color:gray"
 		}).placeAt(slider);
 
 		//F. Description
