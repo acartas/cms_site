@@ -188,10 +188,6 @@ require(["cbtree/Tree",
 	gDojo.ArcGISImageServiceLayer = ArcGISImageServiceLayer;
 	gDojo.ArcGISDynamicMapServiceLayer = ArcGISDynamicMapServiceLayer;
 
-	//Testing drag and drop
-	//wishlist = new Source("wishlistNode");
-	//End testing drag and drop
-
 	//1. Map
 	map = new Map("mapDiv",{
 	  	basemap: "topo",
@@ -217,12 +213,21 @@ require(["cbtree/Tree",
 		
 	var activeInstructions = new TitlePane({
 		title: "Configure Active Layers",
-		content: "View legend and change layer opacity. <s>Click, hold and drag a layer name to change its z-position on the map.</s> Return to the 'Layers' tab to change visible layers.",
+		content: "View legend and change layer opacity. Click, hold and drag a layer name to change its z-position on the map. Return to the 'Layers' tab to change visible layers.",
 		id: 'activeInstructions',
 		open: true
-	}).placeAt(dojo.byId("activeTab"));
+	}).placeAt(dojo.byId("activeTab"),"first");
 
 	//2. Build Navigation Tree.
+	activeTabDnd = new Source("activeTabDnd");
+	dojo.connect(activeTabDnd, "onDrop", function(source, node, copy){	
+		numLayers = map.layerIds.length;
+		var newPos = numLayers - Array.prototype.indexOf.call(dojo.byId('activeTabDnd').children, node[0])-1;
+		map.reorderLayer(map.getLayer(node[0].id.substring(0,node[0].id.length-3)),newPos);
+		//console.log("newPos: "+newPos);
+		//console.log(map.layerIds);
+	});	
+
 	store = new ObjectStore();
 
 	//2a. Biomass/Height/Canopy maps
@@ -869,17 +874,23 @@ function toggleActiveLayer(item){
 	map.getLayer(item.id).setVisibility(item.checked);
 	isVisible = item.checked? 'block' : 'none';
 	dojo.style(store.get(item.id).menu.domNode,'display', isVisible);
+	dojo.style(dojo.byId(item.id+"Dnd"),'display',isVisible);
 	
 	activeLayers[item.id] ? (delete activeLayers[item.id]) : (activeLayers[item.id] = item);
 }
 
 function buildLayerMenu(layerInfo){
+
+	dndDiv = new dojo.create("div",{id:layerInfo.id+"Dnd"});
+	
 	layerInfo.menu = new gDojo.TitlePane({
 			title: layerInfo.fullName,
 			id: layerInfo.id+"Menu",
 			open: true//false
-		}).placeAt(dojo.byId("activeTab"));
-		
+		}).placeAt(dndDiv);
+			
+	activeTabDnd.insertNodes(false,[dndDiv],true);
+	
 	dojo.style(layerInfo.menu.domNode,'display','none'); //temporarily cancelled to debug.
 
 	curMenu = layerInfo.menu;	
@@ -946,4 +957,5 @@ function buildLayerMenu(layerInfo){
 			legendContent += '<tr><td style="width:18px; height:18px; background-image:url('+layerInfo.url+'/0/images/'+legend[i]["url"]+')"></td><td>'+legend[i]["label"]+'</td></tr>';
 		}
 		curMenu.containerNode.appendChild(dojo.create("table", {'class': "mapLegend", innerHTML: legendContent, 'cellspacing':'0px'}));
+		
 }
