@@ -69,11 +69,6 @@ body {
 	border: 1px solid red;
 }
 
-
-
-
-
-
 .statsIcon{ 
 	background-image:url(images/nav_stats.png); 
 	width:16px; 
@@ -153,6 +148,30 @@ h1 {
 	top: 20px;
 	right: 20px;
 }
+
+#alert {
+	position: absolute;
+	z-index: 2;
+	bottom: 10px;
+	left: 30px;
+	background: navajowhite;
+	max-width: 992px;
+	border: 1px solid;
+	border-radius: 3px;
+	padding: 2px;
+}
+
+a.closeX {
+    position: absolute;
+    right: 0px; top: 0px; width:15px;
+    background-color: navajowhite; color: black;
+    margin-top:-12px; margin-right:-12px; border-radius: 10px;
+    padding-left: 3px; padding-top: 0px;
+    cursor:pointer; z-index: -1;
+    font-size:13px; 
+	border: 1px solid;
+}
+
 
 #basemapToggle {
     position: absolute;

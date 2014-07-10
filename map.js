@@ -1,6 +1,7 @@
 //Debug
 LAYOUT_DEBUG = false;
 LOAD_STORE = true;
+MAP_STARTUP = false;
 
 //*********************//
 //***Utility methods***//
@@ -18,76 +19,124 @@ var basemaps = [ {label:"Streets", bm:"streets"}, {label:"Satellite", bm:"satell
 //TODO: Hard-code info from maps into here, to minimize ajax requests, since most of it will be static anyways. (script to build this)		
 var countyMaps = {
 	'Allegany': { 
-		extent: {"xmin":-8805087.036280174,"ymin":4786945.333386234,"xmax":-8714356.283705791,"ymax":4830132.254367301,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8805087.036280174,"ymin":4786945.333386234,"xmax":-8714356.283705791,"ymax":4830132.254367301,"spatialReference":{"wkid":102100}},
+		mapId: 'allegany',
+		resolution: '1m'
 	},
 	'Anne Arundel': { 
-		extent: {"xmin":-8553991.398363845,"ymin":4679857.056758904,"xmax":-8501708.471016765,"ymax":4753695.2260824125,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8553991.398363845,"ymin":4679857.056758904,"xmax":-8501708.471016765,"ymax":4753695.2260824125,"spatialReference":{"wkid":102100}},
+		resolution: '2m',
+		mapId:'anneArundel'
 	},
 	'Baltimore City': 	{ 
-		extent: {"xmin":-8539774.11110263,"ymin":4749720.500611395,"xmax":-8519059.676437374,"ymax":4775326.905086894,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8539774.11110263,"ymin":4749720.500611395,"xmax":-8519059.676437374,"ymax":4775326.905086894,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'baltimoreCity'
 	},
 	'Baltimore': {
-		extent: {"xmin":-8565762.700719628,"ymin":4742688.294009118,"xmax":-8494064.768188106,"ymax":4829826.506254252,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8565762.700719628,"ymin":4742688.294009118,"xmax":-8494064.768188106,"ymax":4829826.506254252,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'baltimore'
 	},
 	'Calvert': {
-		extent: {"xmin":-8540003.422187475,"ymin":4623522.9669127455,"xmax":-8501479.159931798,"ymax":4690023.181520759,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8540003.422187475,"ymin":4623522.9669127455,"xmax":-8501479.159931798,"ymax":4690023.181520759,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'calvert'
 	},
 	'Caroline': {
-		extent: {"xmin":-8459591.668431574,"ymin":4669843.806053456,"xmax":-8421526.028345607,"ymax":4742994.042122271,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8459591.668431574,"ymin":4669843.806053456,"xmax":-8421526.028345607,"ymax":4742994.042122271,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'caroline'
 	},
 	'Carroll': {
-		extent: {"xmin":-8608873.184672348,"ymin":4769747.002022136,"xmax":-8545430.451195737,"ymax":4828756.387858213,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8608873.184672348,"ymin":4769747.002022136,"xmax":-8545430.451195737,"ymax":4828756.387858213,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'carroll'
 	},
 	'Cecil': {
-		extent: {"xmin":-8488331.991066774,"ymin":4774333.223719189,"xmax":-8432380.0863621,"ymax":4827762.706490455,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8488331.991066774,"ymin":4774333.223719189,"xmax":-8432380.0863621,"ymax":4827762.706490455,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'cecil'
 	},
 	'Charles': {
-		extent: {"xmin":-8603446.155664086,"ymin":4614885.582716532,"xmax":-8534729.267235804,"ymax":4674965.0869486,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8603446.155664086,"ymin":4614885.582716532,"xmax":-8534729.267235804,"ymax":4674965.0869486,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'charles'
 	},
 	'Dorchester': {
-		extent: {"xmin":-8499033.175026653,"ymin":4615497.078942799,"xmax":-8424659.946505276,"ymax":4682150.167607383,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8499033.175026653,"ymin":4615497.078942799,"xmax":-8424659.946505276,"ymax":4682150.167607383,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'dorchester'
 	},
 	'Frederick': {
-		extent: {"xmin":-8649002.624522012,"ymin":4755376.840704543,"xmax":-8579750.676895734,"ymax":4827609.832433936,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8649002.624522012,"ymin":4755376.840704543,"xmax":-8579750.676895734,"ymax":4827609.832433936,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'frederick'
 	},
 	'Garrett': {
-		extent: {"xmin":-8868224.021643858,"ymin":4748956.130328465,"xmax":-8757848.952800022,"ymax":4838081.705309015,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8868224.021643858,"ymin":4748956.130328465,"xmax":-8757848.952800022,"ymax":4838081.705309015,"spatialReference":{"wkid":102100}},
+		resolution: '2m',
+		mapId:'garrett'
 	},
 	'Harford': {
-		extent: {"xmin":-8527085.564407306,"ymin":4764319.973013843,"xmax":-8465477.319609538,"ymax":4828679.950829876,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8527085.564407306,"ymin":4764319.973013843,"xmax":-8465477.319609538,"ymax":4828679.950829876,"spatialReference":{"wkid":102100}},
+		resolution: '2m',
+		mapId:'harford'
 	},
 	'Howard': {
-		extent: {"xmin":-8595038.082552869,"ymin":4736649.768774786,"xmax":-8536793.066999642,"ymax":4776320.586454739,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8595038.082552869,"ymin":4736649.768774786,"xmax":-8536793.066999642,"ymax":4776320.586454739,"spatialReference":{"wkid":102100}},
+		resolution: '2m',
+		mapId:'howard'
 	},
 	'Kent': {
-		extent: {"xmin":-8504230.892950194,"ymin":4696596.765953163,"xmax":-8428099.612778129,"ymax":4777467.141878909,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8504230.892950194,"ymin":4696596.765953163,"xmax":-8428099.612778129,"ymax":4777467.141878909,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'kent'
 	},
 	'Montgomery': {
-		extent: {"xmin":-8627982.441743735,"ymin":4711960.608638707,"xmax":-8557354.627608327,"ymax":4774256.786691042,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8627982.441743735,"ymin":4711960.608638707,"xmax":-8557354.627608327,"ymax":4774256.786691042,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'montgomery'
 	},
 	"Prince George's": {
-		extent: {"xmin":-8576540.321707888,"ymin":4662200.103225025,"xmax":-8533276.96369846,"ymax":4737261.265001097,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8576540.321707888,"ymin":4662200.103225025,"xmax":-8533276.96369846,"ymax":4737261.265001097,"spatialReference":{"wkid":102100}},
+		resolution: '1.2m',
+		mapId:'princeGeorges'
 	},
 	"Queen Anne's": {
-		extent: {"xmin":-8501708.471016783,"ymin":4668620.813600776,"xmax":-8426494.43518414,"ymax":4759580.877260169,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8501708.471016783,"ymin":4668620.813600776,"xmax":-8426494.43518414,"ymax":4759580.877260169,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'queenAnne'
 	}, 
 	'Sommerset': {
-		extent: {"xmin":-8467388.245316632,"ymin":4565965.884614071,"xmax":-8406467.933773428,"ymax":4624593.085308722,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8467388.245316632,"ymin":4565965.884614071,"xmax":-8406467.933773428,"ymax":4624593.085308722,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'sommerset'
 	},
 	"St Mary's": {
-		extent: {"xmin":-8560029.923598165,"ymin":4584769.393572213,"xmax":-8492841.775735585,"ymax":4653562.719028779,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8560029.923598165,"ymin":4584769.393572213,"xmax":-8492841.775735585,"ymax":4653562.719028779,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'stMarys'
 	},
 	'Talbot': {
-		extent: {"xmin":-8501020.537762085,"ymin":4660671.362659247,"xmax":-8447285.306877678,"ymax":4713642.223260803,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8501020.537762085,"ymin":4660671.362659247,"xmax":-8447285.306877678,"ymax":4713642.223260803,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'talbot'
 	},
 	'Washington': {
-		extent: {"xmin":-8727350.578514209,"ymin":4766078.024664408,"xmax":-8623472.657074794,"ymax":4829215.010027879,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8727350.578514209,"ymin":4766078.024664408,"xmax":-8623472.657074794,"ymax":4829215.010027879,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'washington'
 	},
 	'Wicomico': {
-		extent: {"xmin":-8452712.335886149,"ymin":4608694.183425576,"xmax":-8380632.2182133235,"ymax":4660518.488602856,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8452712.335886149,"ymin":4608694.183425576,"xmax":-8380632.2182133235,"ymax":4660518.488602856,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'wicomico'
 	},
 	'Worcester': {
-		extent: {"xmin":-8423284.079996146,"ymin":4578654.431309393,"xmax":-8352962.013973878,"ymax":4644008.0904931305,"spatialReference":{"wkid":102100}}
+		extent: {"xmin":-8423284.079996146,"ymin":4578654.431309393,"xmax":-8352962.013973878,"ymax":4644008.0904931305,"spatialReference":{"wkid":102100}},
+		resolution: '1m',
+		mapId:'worcester'
 	}
 };
 
@@ -103,7 +152,7 @@ var curLayer;
 var tree, model, store;
 var calcStatsButton, cancelStatsButton;
 var gDojo = {};
-var servicesUrl = 'http://129.2.25.192:6080/arcgis/rest/services/';
+var servicesUrl = 'arcgis/rest/services/';
 
 require(["cbtree/Tree",
 		"cbtree/store/ObjectStore",
@@ -224,61 +273,74 @@ require(["cbtree/Tree",
 		numLayers = map.layerIds.length;
 		var newPos = numLayers - Array.prototype.indexOf.call(dojo.byId('activeTabDnd').children, node[0])-1;
 		map.reorderLayer(map.getLayer(node[0].id.substring(0,node[0].id.length-3)),newPos);
-		//console.log("newPos: "+newPos);
-		//console.log(map.layerIds);
 	});	
 
 	store = new ObjectStore();
 
-	//2a. Biomass/Height/Canopy maps
-	var serviceFolders = [{id: 'biomass', label: 'Biomass'}, {id: 'height', label: 'Canopy Height'},  {id: 'cover', label: 'Canopy Cover'}, {id: 'ed', label: 'ED Model Beta Estimates'}];
+	//2a. Map layers - hardcoded titles for quicker loading times.
+	
+	//Biomass Maps	
+	if (MAP_STARTUP && !LAYOUT_DEBUG) var biomassChecked = true;
+	else var biomassChecked = false;
+		
+	store.add({id: 'biomass', name: 'Biomass', type: "parent"});
+	store.add({id: 'biomass/fullState', name: 'Full State (30m)', url: servicesUrl+'biomass/fullState/MapServer', checked: biomassChecked, parent: 'biomass'});
+	store.add({id: 'biomass/nbcd', name: 'NBCD Biomass (30m)', url: servicesUrl+'biomass/nbcd/MapServer',parent: 'biomass'});
 
-	if (LOAD_STORE){
-		async.each(serviceFolders, 
-			function(ser, callback){		
-				store.add({id: ser.id, name: ser.label, type: "parent"});
-				var curMaps = getJSONSync(servicesUrl + ser.id).services;
-				addMapsToFolder(curMaps, ser.id, callback);
-			},
-			function(err){
-				if (err)
-					console.log("Could not locate all serviceFolders.");
-				else{
-
-					model  = new StoreModel({ 
-						store:store, 
-						query:{type:"parent"},
-						onNewItem: function(item, parentInfo){
-							if (this.store.getValue(item, 'type') == 'parent'){
-								this._requeryTop();
-							}
-							this.inherited(arguments);
-						}
-						});
-			
-					tree = new Tree( {
-						id: "cbTree",
-						model:model, 
-						showRoot:false, 
-						branchIcons: false,
-						branchCheckBox: false,
-						leafIcons: false,
-						openOnClick: true,
-						autoExpand: false,
-						}).placeAt(dojo.byId("layersTab"));
-					
-					tree.startup();
-					tree.on("checkBoxClick", function(item){
-						toggleActiveLayer(item);
-					});	
-					
-					
-					toggleActiveLayer(store.get('biomass/fullState')); //Setup: Make this one open on startup
-					tree.expandChecked();
-				}
-			}
-		);
+	//Height + Canopy Maps
+	store.add({id: 'height', name: 'Canopy Height', type: "parent"});	
+	store.add(({id: 'height/fullState', name: 'Full State (30m)', url: servicesUrl+'height/fullState/MapServer', type: 'child', parent: 'height'}));
+	store.add({id: 'cover', name: 'Canopy Cover', type: "parent"});
+	store.add(({id: 'cover/fullState', name: 'Full State (30m)', url: servicesUrl+'cover/fullState/MapServer', type: 'child', parent: 'cover'}));
+	for (var cur in countyMaps){
+		store.add(({id: 'cover/'+countyMaps[cur].mapId, name: cur+" ("+countyMaps[cur].resolution+")", url: servicesUrl+'cover/'+countyMaps[cur].mapId+'/MapServer', parent: 'cover'}));
+		store.add(({id: 'height/'+countyMaps[cur].mapId, name: cur+" ("+countyMaps[cur].resolution+")", url: servicesUrl+'height/'+countyMaps[cur].mapId+'/MapServer', parent: 'height'}));
 	}
+
+	//ED Maps
+	var edMaps = [{id: 'ED_AGB_for_percent_tree_UTM_90m' ,name:'Above Ground Biomass'},
+					{id: 'ED_sequestration_potential_UTM_90m', name:'Carbon Sequestration Potential'},
+    				{id: 'ED_sequestration_potential_gap_UTM_90m', name:'Gap to CSP'},
+    				{id: 'ED_Age_Gap_UTM_90m', name:'Gap of Years to CSP'},
+    				{id: 'ED_NEP_for_percent_tree_UTM_90', name:'Net Ecosystem Exchange'}];
+    var edMapsLength = edMaps.length;
+	store.add({id: 'ed', name: 'ED Model Beta Estimates', type: "parent"});
+	for (var i =0; i < edMapsLength; i++){
+		store.add({id: 'ed/'+edMaps[i].id, name: edMaps[i].name, url: servicesUrl+'ed/'+edMaps[i].id+'/MapServer', type:"child", parent: "ed"});
+	}
+	
+	model  = new StoreModel({ 
+		store:store, 
+		query:{type:"parent"},
+		onNewItem: function(item, parentInfo){
+			if (this.store.getValue(item, 'type') == 'parent'){
+				this._requeryTop();
+			}
+			this.inherited(arguments);
+		}
+	});
+	
+	tree = new Tree( {
+		id: "cbTree",
+		model:model, 
+		showRoot:false, 
+		branchIcons: false,
+		branchCheckBox: false,
+		leafIcons: false,
+		openOnClick: true,
+		autoExpand: false
+		}).placeAt(dojo.byId("layersTab"));
+	
+	tree.startup();
+	tree.on("checkBoxClick", function(item){
+		toggleActiveLayer(item);
+	});	
+					
+	if (MAP_STARTUP && !LAYOUT_DEBUG){	
+		toggleActiveLayer(store.get('biomass/fullState'));
+	}
+
+	//tree.expandChecked();
 		
 	buildZonalStatsTool(); //Temporary version until the all-layers version is available.
 	buildAddMapTool();
@@ -429,78 +491,8 @@ require(["cbtree/Tree",
 			//dojo.byId(curLayer+"StatsButton").classList.remove("statsButtonActive");
 		}
 	});
+	
 });
-
-function addMapsToFolder(curMaps, parent, returnFunc){
-		//Add the fullState. (not the most elegant solution, I don't know how to reorder items in the store/tree/model). Sync so that it is added before others.
-		for (var cur in curMaps){
-			if (curMaps[cur].name.endsWith('fullState')){
-				var curMap = {};
-				curMap.url = servicesUrl+curMaps[cur].name+'/MapServer';
-				mapInfo = getJSONSync(curMap.url);
-				
-				curMap.id = curMaps[cur].name;
-				curMap.name = mapInfo.mapName;
-				curMap.fullName= mapInfo.documentInfo.Title;
-				curMap.opacity = 0.8; //TODO: match to config file
-				curMap.type = "child";
-				curMap.tiled = (mapInfo.lods != null);
-				curMap.parent = parent;
-				curMap.idTask = new gDojo.IdentifyTask(curMap.url);
-				curMap.mapInfo = mapInfo;
-				if (curMaps[cur].name == 'biomass/fullState')
-					curMap.checked = true;
-				//buildLayerMenu(curMap);
-				store.add(curMap);
-				curMaps.splice(cur,1);
-				break;
-			}
-		}
-		
-		//Add individual county maps async style, to speed it up.
-		var mapInfos = [];
-		async.each(curMaps, function( cur, callback) {
-			var curMap = {};
-			curMap.url = servicesUrl+cur.name+'/MapServer';
-			$.ajax({
-				type: "GET",
-				url: curMap.url+"?f=json",
-				async: true,
-				dataType: "json",				
-				success: function(mapInfo, status){
-					curMap.id = cur.name;
-					curMap.name = mapInfo.mapName;
-					curMap.fullName= mapInfo.documentInfo.Title;
-					curMap.opacity = 1; //TODO: match to config file
-					curMap.type = "child";
-					curMap.tiled = (mapInfo.lods != null);
-					curMap.parent = parent;
-					curMap.idTask = new gDojo.IdentifyTask(curMap.url);
-					curMap.mapInfo = mapInfo;
-					//buildLayerMenu(curMap);
-					mapInfos.push(curMap);
-					callback();					
-				}
-			});
-		}, function(err){
-			if( err ) {
-			  // One of the iterations produced an error. All processing will now stop.
-			  console.log('A map couldnt be added to ' + parent + ": " + err);
-			} else {
-				var numMaps = mapInfos.length;
-				for (var i = 0; i < numMaps; i++){		
-					try {
-						store.add(mapInfos[i]);		
-					}
-					catch(err){
-						console.log("Trying to add " + mapInfos[i].id + " to store, but it already exists. Ignored.");
-					}
-				}	
-				returnFunc();
-			}
-		});	
-	}
-
 
 function identifyPoint(evt){
 	if (isDrawing || activeLayers.length == 0) return; 
@@ -602,7 +594,7 @@ function buildZonalStatsTool(){
 			toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);
 			map.hideZoomSlider();
 			cancelStatsButton.set('disabled',false);
-			},
+			}
 		}).placeAt(zonalStatsMenu);
 	
 	cancelStatsButton = new gDojo.Button({
@@ -616,7 +608,7 @@ function buildZonalStatsTool(){
 			map.infoWindow.hide();
 			toolbar.deactivate(esri.toolbars.Draw.FREEHAND_POLYGON);
 			map.showZoomSlider();
-		},
+		}
 	}).placeAt(zonalStatsMenu);
 	
 }
@@ -738,7 +730,6 @@ function buildPrintTool(){
 				printTask.execute(printParams, function(data){
 				printButton.set('disabled',false);
 					printResults.innerHTML = "<a href='" + data.url+ "' target='_blank'>Open Map Image</a>";
-					console.log("Printed successfully.");
 				}, function(err){
 				printButton.set('disabled',false);
 				printResults.innerHTML = "Failed to print.";
@@ -854,10 +845,10 @@ function getJSONSync(url){
 
 function toggleActiveLayer(item){
 	if (item.checked && !map.getLayer(item.id)){
-		buildLayerMenu(item);
 		if (!LAYOUT_DEBUG){
+			opacity = item.opacity? item.opacity : 0.8;
 			var layerParams = {
-				opacity: item.opacity,
+				opacity: opacity,
 				id: item.id,
 				visible: true,
 				showAttribution: false	
@@ -869,6 +860,7 @@ function toggleActiveLayer(item){
 			else
 				map.addLayer(new gDojo.ArcGISDynamicMapServiceLayer(item.url, layerParams));
 		}
+		buildLayerMenu(item);		
 	}
 	
 	map.getLayer(item.id).setVisibility(item.checked);
@@ -879,34 +871,48 @@ function toggleActiveLayer(item){
 	activeLayers[item.id] ? (delete activeLayers[item.id]) : (activeLayers[item.id] = item);
 }
 
-function buildLayerMenu(layerInfo){
+function buildLayerMenu(curMap){
 
-	dndDiv = new dojo.create("div",{id:layerInfo.id+"Dnd"});
+	//Get Map info when not already existing
+	if (curMap.mapInfo == null){
+		curMap.mapInfo = getJSONSync(curMap.url);			
+		curMap.name = curMap.mapInfo.mapName;
+		if (curMap.mapInfo.documentInfo)
+			curMap.fullName= curMap.mapInfo.documentInfo.Title;
+		else
+			curMap.fullName = curMap.name;
+		curMap.opacity = 0.8; //TODO: match to config file
+		curMap.type = "child";
+		curMap.tiled = (curMap.mapInfo.lods != null);
+		curMap.idTask = new gDojo.IdentifyTask(curMap.url);
+	}
 	
-	layerInfo.menu = new gDojo.TitlePane({
-			title: layerInfo.fullName,
-			id: layerInfo.id+"Menu",
+	dndDiv = new dojo.create("div",{id:curMap.id+"Dnd"});
+	
+	curMap.menu = new gDojo.TitlePane({
+			title: curMap.fullName,
+			id: curMap.id+"Menu",
 			open: true//false
 		}).placeAt(dndDiv);
 			
 	activeTabDnd.insertNodes(false,[dndDiv],true);
 	
-	dojo.style(layerInfo.menu.domNode,'display','none'); //temporarily cancelled to debug.
+	dojo.style(curMap.menu.domNode,'display','none'); //temporarily cancelled to debug.
 
-	curMenu = layerInfo.menu;	
-	curMenu.containerNode.appendChild(dojo.create("label", {'for': layerInfo.id+"OpacitySlider", innerHTML: "Layer Opacity"}));
+	curMenu = curMap.menu;	
+	curMenu.containerNode.appendChild(dojo.create("label", {'for': curMap.id+"OpacitySlider", innerHTML: "Layer Opacity"}));
 		
 		var slider = new gDojo.HorizontalSlider({
-			id:layerInfo.id+"OpacitySlider",
-			layer: layerInfo.id,
-			value: layerInfo.opacity,
+			id:curMap.id+"OpacitySlider",
+			layer: curMap.id,
+			value: curMap.opacity,
 			minimum: 0,
 			maximum: 1,
 			intermediateChanges: true,
 			showButtons:false, 
 			onChange: function(value){ 
 				map.getLayer(this.layer).setOpacity(value);
-			},
+			}
 		}).placeAt(curMenu.containerNode);
 		
 		var ruler = new gDojo.HorizontalRule({
@@ -917,34 +923,34 @@ function buildLayerMenu(layerInfo){
 		
 		var rulerLabel = new gDojo.HorizontalRuleLabels({
 			container: "bottomDecoration",
-			style: "height:1em; font-size:75%; color:gray",
+			style: "height:1em; font-size:75%; color:gray"
 		}).placeAt(slider);
 
 		//F. Description
-		if (layerInfo.mapInfo)
-			serviceJSON = layerInfo.mapInfo;
+		if (curMap.mapInfo)
+			serviceJSON = curMap.mapInfo;
 		else 
-			serviceJSON = getJSONSync(layerInfo.url);
+			serviceJSON = getJSONSync(curMap.url);
 		//other useful items: mapName, layers, layers.name, initialExtent, fullExtent, documentInfo.Title, documentInfo.Subject, documentInfo.Category, tileInfo
 		curMenu.containerNode.appendChild(dojo.create("p", {innerHTML: serviceJSON["serviceDescription"]})); 
 		
 		//F. Legend
-		legendJSON = getJSONSync(layerInfo.url+"/legend");
-		if (layerInfo.parent == 'biomass' || layerInfo.name.indexOf('Biomass') != -1){
+		legendJSON = getJSONSync(curMap.url+"/legend");
+		if (curMap.parent == 'biomass' || curMap.name.indexOf('Biomass') != -1){
 			legTitle = 'Biomass (Mg/ha)';
 		}
-		else if (layerInfo.parent == 'height' || layerInfo.name.indexOf('Height') != -1){
+		else if (curMap.parent == 'height' || curMap.name.indexOf('Height') != -1){
 			legTitle = 'Height (m)';
 		}
-		else if (layerInfo.parent =='cover'){
-			if (layerInfo.mapInfo && layerInfo.mapInfo.mapName == 'Full State (30m)'){
+		else if (curMap.parent =='cover'){
+			if (curMap.mapInfo && curMap.mapInfo.mapName == 'Full State (30m)'){
 				legTitle = 'Canopy Cover (%)';
 				}
 			else {
 				legTitle = 'Cover Classification';
 			}
-		} else if (layerInfo.parent =='ed'){
-			legTitle = layerInfo.mapInfo.layers[0].name;
+		} else if (curMap.parent =='ed'){
+			legTitle = curMap.mapInfo.layers[0].name;
 		}
 		else {
 			legTitle ='';
@@ -954,7 +960,7 @@ function buildLayerMenu(layerInfo){
 		legend = legendJSON["layers"][0]["legend"]; //This is only for layer 0, since all my maps atm have just one.
 		var legendContent = '<tr><th colspan="2">'+legTitle+'</th></tr>'; //TODO: grab from metadata?
 		for (i = 0 ; i< legend.length; i++){
-			legendContent += '<tr><td style="width:18px; height:18px; background-image:url('+layerInfo.url+'/0/images/'+legend[i]["url"]+')"></td><td>'+legend[i]["label"]+'</td></tr>';
+			legendContent += '<tr><td style="width:18px; height:18px; background-image:url('+curMap.url+'/0/images/'+legend[i]["url"]+')"></td><td>'+legend[i]["label"]+'</td></tr>';
 		}
 		curMenu.containerNode.appendChild(dojo.create("table", {'class': "mapLegend", innerHTML: legendContent, 'cellspacing':'0px'}));
 		
